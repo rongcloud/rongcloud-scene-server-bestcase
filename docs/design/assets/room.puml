@@ -1,0 +1,88 @@
+@startuml
+actor 用户 AS A
+participant "RongRTC Server" AS B
+participant "IM Server" AS C
+participant "RTC Server" AS D
+
+== 房间创建 ==
+A->B: createRoom(name,themePictureUrl)
+note left
+只有短信登录用户
+才可以创建房间
+end note
+activate B
+B->C: 创建IM聊天室(roomId, roomName)
+activate C
+C-->B: success
+deactivate C
+
+B->C: 设置麦位属性(chatRoomId, key, value, sendNotification ...)
+note left
+设置麦位属性，1 个主持麦位 8 个普通麦位
+主持麦位Key: mic_position_0
+普通麦位Key: mic_position_{1 - 8}
+麦位Value: {"position":0,"userId":"xxx","state":0}
+
+其他：
+1、用户退出房间，此设置需保留
+end note
+C-->B: success
+
+B-->A: result<roomId, roomName ...>
+deactivate B
+== 加入房间 ==
+A->C: 加入 IM 聊天室(roomId)
+activate C
+C-->A: success
+A->D: 加入 RTC 房间(roomId)
+note left
+end note
+D-->A: success
+A->C: 发送聊天室消息，通知聊天室其他成员 "xxx加入了聊天室"
+C-->A: success
+deactivate C
+== 退出房间 ==
+A->C: 退出 IM 聊天室(roomId)
+activate C
+C-->A: success
+A->D: 退出 RTC 房间(roomId)
+note left
+主持人、在麦用户需要退出 RTC
+end note
+D-->A: success
+deactivate C
+
+== 房间设置 ==
+A->B: roomSetting(allowedJoinRoom,allowedFreeJoinMic)
+B-->A: success
+
+== 将房间用户禁言 ==
+A->B: roomUserGag(userId, roomId)
+activate B
+note left: 只有主持人可操作
+B->C: gagUser(userId,chatRoomId, minute)
+note right
+被禁言用户可以接收查看
+聊天室中用户聊天信息，
+但不能发送消息
+end note
+activate C
+C-->B: success
+B-->A: success
+deactivate B
+
+C-->B: success
+B-->A: success
+deactivate B
+deactivate C
+== 房间销毁 ==
+
+note right
+1 小时内该房间中没有发送
+过新消息或没有用户加入时，
+则该房间将自动销毁。
+end note
+C->B: 房间销毁信息路由到 RongRTC Server
+B-->C: success
+deactivate C
+@enduml

@@ -1,0 +1,110 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/rong?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mvc:
+    static-path-pattern: /static/**
+  resources:
+    static-locations: classpath:/static/
+#  flyway:
+#    baseline-on-migrate: true
+#    clean-disabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+      indent_output: true
+      write_null_map_values: false
+    deserialization:
+      accept_single_value_as_array: true
+    default-property-inclusion: non_null
+  redisson:
+    address: 127.0.0.1:6379
+    timeout: 3000
+    database: 0
+    pool:
+      max-active: 20
+      max-idle: 10
+      max-wait: 3000
+      min-idle: 4
+    password:
+
+## JWT 鉴权配置
+jwt:
+  secret: "12345678"
+  ttlInMilliSec: -1
+
+## 融云 IM 配置
+im:
+  appKey: key
+  secret: secret
+  host: http://api-cn.ronghub.com
+
+## 融云 SMS 配置
+sms:
+  appKey: key
+  secret: secret
+  host: http://api.sms.ronghub.com
+  templateId: templateId #登录短信模块 Id
+  foreignSmstmpid: foreignSmsTmpId # 海外版短信模板
+
+## Redis 连接配置
+redis:
+  database: 0
+  host: 127.0.0.1
+  port: 6379
+  pass:
+  maxIdle: 100
+  maxTotal: 300
+  testOnBorrow: true
+  timeout: 3000
+  pool:
+    max-active: 20
+    max-idle: 10
+    max-wait: 3000
+    min-idle: 4
+
+## RongRTC 应用配置
+rongrtc:
+  domain: http://127.0.0.1 # RongRTC Server 地址，协议://域名:端口
+  login:
+    sms_verify: false #登录是否校验短信验证码
+  filepath: /data/app/files/
+  adminURL: adminUrl
+  mic:
+    transfer_host_expire: 300 #主持人转让信息过期时间，单位秒
+    takeover_host_expire: 300 #接管主持人信息过期时间，单位秒
+
+  room:
+    expire: 3  # 房间过期多长时间
+
+## 小程序加群
+wechat:
+  applet:
+    appId: appId
+    appSecret: appSecret
+    code2SessionUrl: https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code
+
+domainUrl: domainUrl
+queryMobileLimit: 199
+
+mybatis-plus:
+  type-aliases-package: cn.rongcloud.mic.*.entity
+  mapper-locations: classpath*:cn/rongcloud/mic/**/mapping/*.xml
+
+shumei:
+  imageUrl: http://api-img-bj.fengkongcloud.com/image/v4
+  textUrl: http://api-text-bj.fengkongcloud.com/text/v4
+  riskUrl: http://api-skynet-bj.fengkongcloud.com/v4/event
+  accessKey: 1234567
+  appKey: 12345
+
+game:
+  url: https://sim-asc.sudden.ltd/
+  appId: 123456
+  appSecret: 123456
+  reportSecret: 123456

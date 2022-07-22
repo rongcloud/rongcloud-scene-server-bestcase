@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.mic.room.mapper.RoomMapper">
+
+
+    <!-- 通用查询结果列 -->
+  <sql id="Base_Column_List">
+    id,uid,name, theme_picture_url, background_url, type, is_private
+  </sql>
+  <select id="findRoomPage" resultType="cn.rongcloud.mic.room.model.TRoom">
+    select * from t_room_mic r left join t_user u on r.user_id=u.uid where r.room_type=#{roomType}
+    <if test="null != sex">
+      and u.sex=#{sex}
+    </if>
+    <if test="gameId != null and gameId != ''">
+      and r.game_id=#{gameId}
+    </if>
+    order by r.id desc
+    limit #{start},#{end}
+  </select>
+
+  <select id="findRoomPageTotal" resultType="java.lang.Long">
+    select count(0) from t_room_mic r left join t_user u on r.user_id=u.uid where r.room_type=#{roomType}
+    <if test="null != sex">
+      and u.sex=#{sex}
+    </if>
+    <if test="gameId != null and gameId != ''">
+      and r.game_id=#{gameId}
+    </if>
+  </select>
+
+  <select id="selectOneByGameId" resultType="cn.rongcloud.mic.room.model.TRoom">
+    select * from t_room_mic
+    where room_type = 4
+    and is_private = 0
+    <if test="gameId != null and gameId != ''">
+      and game_id=#{gameId}
+    </if>
+    order by game_status asc, update_dt desc
+    limit 0,1
+  </select>
+</mapper>
