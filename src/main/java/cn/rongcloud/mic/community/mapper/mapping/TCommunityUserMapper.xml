@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.mic.community.mapper.TCommunityUserMapper">
+
+    <update id="updateOnlineStatusByUserId">
+        update t_community_user set online_status = #{onlineStatus},update_time= NOW() where user_uid = #{userId} and status =3
+    </update>
+
+    <select id="queryUserCountByCommunityUids" resultType="cn.rongcloud.mic.community.dto.CommunityUserCount">
+        select community_uid as communityUid,count(0) as count from t_community_user where
+        community_uid in
+        <foreach item="item" index="index" collection="communityUids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and status=3 and del_flag=0 group by community_uid
+    </select>
+</mapper>

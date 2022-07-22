@@ -1,0 +1,57 @@
+@startuml
+actor 主持人 AS A
+actor 观众 AS G
+participant "RongRTC Server" AS B
+participant "IM Server" AS C
+participant "RTC Server" AS D
+== 观众申请上麦(房间设置: 不允许自由上麦) ==
+G->B: roomMicApply(userId, roomId)
+B-->G: success
+== 主持人处理上麦申请 ==
+A->B: getApplyMicMembers(roomId)
+B-->A: success
+alt 同意上麦
+A->B: roomMicAccept(userId, roomId)
+B->B: 从 Redis 获取第一个空麦位属性
+B->C: setChatRoomEntry(chatRoomId, key, value, sendNotification ...)
+note left
+将空麦位 userId 设置用户id代表该用户上麦，
+相反设置为空代表用户下麦
+Key: mic_position_{0-8}
+Value: {"userId":"xxxxx","state":0}
+其他：
+1、需要发送通知
+
+end note
+activate C
+C-->B: success
+C-->A: 麦位更新通知
+C-->G: 麦位更新通知
+deactivate C
+A->D: joinRTCRoom(roomId)
+note left
+申请排麦同意用户
+需加入 RTC 房间
+end note
+D-->A: success
+else 拒绝上麦
+B->B: 从排麦列表移除
+B-->A: success
+end
+== 麦位控制 ==
+A->B: roomMicStateSetting(roomId, positionKey, state)
+B->C: setChatRoomEntry(chatRoomId, key, value, sendNotification ...)
+activate C
+note left
+Key: mic_position_{0-8}
+Value: {"userId":"xxxxx","state":0}
+其他:
+1、需要发送通知
+2、state: 0=正常，1=锁定，2=闭麦
+end note
+C-->B: success
+C->A: 麦位更新通知
+C->G: 麦位更新通知
+deactivate C
+
+@enduml

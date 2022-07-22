@@ -1,0 +1,63 @@
+@startuml
+participant "RongRTC Client" AS A
+participant "RongRTC Server" AS B
+participant "IM Server" AS C
+participant "SMS Server" AS D
+
+== 初次使用 APP 或卸载重装 ==
+alt 游客登录 case
+A->B: visitorLogin(deviceId, userName, portrait)
+activate "B"
+B->B: 根据 deviceId 判断，有则返回无则新增游客
+B->C: getToken(userId, name, portrait)
+C-->B: result<imToken>
+B-->A: result <userId, userType, imToken, authorization ...>
+deactivate "B"
+A->C: 与 IM 建立连接（imToken）
+else 手机号登录 case
+A->B: sendCode(mobile)
+activate "B"
+B->D: sendCode(mobile, templateId, verifyCode...)
+D-->B: result<code, sessionId>
+B-->A: result <code=200>
+deactivate "B"
+D->A: 给用户手机发送短信验证码
+A->B: login(mobile, verifyCode, userName, portrait)
+activate "B"
+B->D: verifyCode(sessionId, code)
+D-->B: result<code>
+B->B: 根据 mobile 判断，有则返回无则新增用户
+B->C: getToken(userId, name, portrait)
+C-->B: result<imToken>
+B-->A: result <userId, imToken, userType, authorization ...>
+deactivate "B"
+activate "A"
+A->A: 清空本地游客信息、保存用户信息
+A->B: 使用用户身份 authorization 重新与 RongRTCServer 连接
+A->C: 使用用户身份 imToken 重新与 IM Server 连接
+deactivate "A"
+end
+== APP 杀进程重新打开 ==
+A->B: getRoomList()
+note left
+      RongRTC Server API 接口会对
+      客户端请求携带的 authorization
+      参数进行认证校验
+end note
+B->B: 校验 authorization 是否有效
+B-->A: result<code, data>
+alt authorization 无效
+A->B: visitorLogin(deviceId, userName, portrait)
+B->B: 根据deviceId判断，有则返回无则新增游客
+B->C: getToken(userId, name, portrait)
+C-->B: result<imToken>
+B-->A: result <userId, userType, imToken, authorization ...>
+activate "A"
+A->A: 清空本地用户信息、保存游客信息
+A->B: 使用游客身份 authorization 重新与 RongRTC Server 连接
+A->C: 使用游客身份 imToken 重新与 IM Server 连接
+deactivate "A"
+else authorization 有效
+A->A: 使用缓存的用户 imToken 与 IM Server 重新建立连接
+end
+@enduml

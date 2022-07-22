@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.mic.community.mapper.TGroupMapper">
+
+<!--    <update id="batchUpdate2">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update t_group
+            <trim prefix="SET" suffixOverrides=",">
+                <if test="item.name != null" >
+                    `name` = #{item.name},
+                </if>
+                <if test="item.sort != null" >
+                    sort = #{item.sort},
+                </if>
+                <if test="item.delFlag != null" >
+                    del_flag = #{item.delFlag},
+                </if>
+                update_time = now()
+            </trim>
+            where uid = #{item.uid}
+        </foreach>
+    </update>-->
+
+    <update id="batchUpdate">
+        update t_group
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="name =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.name!=null">
+                        when uid=#{i.uid} then #{i.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="sort =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.sort!=null">
+                        when uid=#{i.uid} then #{i.sort}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="del_flag =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.delFlag!=null">
+                        when uid=#{i.uid} then #{i.delFlag}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="list" separator="or" item="i" index="index" >
+            uid=#{i.uid}
+        </foreach>
+    </update>
+    <select id="maxSort" resultType="int">
+        select MAX(sort) from t_group where community_uid=#{communityUid}
+    </select>
+
+</mapper>

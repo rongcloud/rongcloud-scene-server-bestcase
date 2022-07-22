@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.mic.community.mapper.TChannelMapper">
+
+    <update id="batchUpdate">
+        update t_channel
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="name =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.name!=null">
+                        when uid=#{i.uid} then #{i.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="sort =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.sort!=null">
+                        when uid=#{i.uid} then #{i.sort}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="group_uid =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.groupUid!=null">
+                        when uid=#{i.uid} then #{i.groupUid}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="del_flag =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.delFlag!=null">
+                        when uid=#{i.uid} then #{i.delFlag}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="list" separator="or" item="i" index="index" >
+            uid=#{i.uid}
+        </foreach>
+    </update>
+
+    <select id="maxSortByGroupUid" resultType="Integer">
+        select MAX(sort) from t_channel where group_uid=#{groupUid}
+    </select>
+
+    <select id="maxSortByCommuntiyUid" resultType="Integer">
+        select MAX(sort) from t_channel where community_uid=#{communityUid}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rongcloud.mic.game.mapper.GameReportSudMapper">
+
+    <insert id="add">
+      insert into t_game_report_sud values
+        (null, #{report_type}, #{uid}, #{ss_token}, #{report_msg.mg_id}, #{report_msg.mg_id_str}, #{report_msg.room_id},
+         #{report_msg.game_mode}, #{report_msg.game_round_id}, #{report_msg.battle_start_at}, #{report_msg.battle_end_at},
+         #{report_msg.battle_duration}, #{report_msg.report_game_info_extras},
+         #{report_msg.players,typeHandler=cn.rongcloud.mic.common.filter.JsonTypeHandler},
+         #{report_msg.results,typeHandler=cn.rongcloud.mic.common.filter.JsonTypeHandler},
+         now())
+    </insert>
+</mapper>
