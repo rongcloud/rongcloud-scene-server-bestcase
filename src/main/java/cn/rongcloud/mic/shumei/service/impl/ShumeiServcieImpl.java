@@ -69,7 +69,7 @@ public class ShumeiServcieImpl implements ShumeiService {
     }
 
     private RestResult execute(HashMap<String, Object> payload,HashMap<String, Object> data,String url){
-     /*   data.put("tokenId", UUID.randomUUID());
+        data.put("tokenId", UUID.randomUUID());
         payload.put("accessKey", ACCESS_KEY);
         payload.put("appId", "default");
         payload.put("data", data);
@@ -86,8 +86,7 @@ public class ShumeiServcieImpl implements ShumeiService {
         if(shumeiResp.getCode().intValue()==1903){
             return RestResult.generic(shumeiResp.getCode(),"数美审核服务器连接失败，请联系客服人员。");
         }
-        return RestResult.generic(RestResultCode.ERR_SHUMEI_AUDIT_FAIL);*/
-        return RestResult.success();
+        return RestResult.generic(RestResultCode.ERR_SHUMEI_AUDIT_FAIL);
     }
 
 }
