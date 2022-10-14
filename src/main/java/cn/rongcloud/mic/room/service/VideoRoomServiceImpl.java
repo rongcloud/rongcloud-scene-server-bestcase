@@ -1,5 +1,6 @@
 package cn.rongcloud.mic.room.service;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.rongcloud.common.im.ChrmEntrySetInfo;
 import cn.rongcloud.common.im.IMHelper;
 import cn.rongcloud.common.im.RTCHelper;
@@ -14,15 +15,16 @@ import cn.rongcloud.mic.room.model.TRoom;
 import cn.rongcloud.mic.room.pojos.ReqRoomMusicDelete;
 import cn.rongcloud.mic.room.pojos.ReqVideoRoomStatusSync;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -42,6 +44,8 @@ public class VideoRoomServiceImpl implements VideoRoomService{
 
     @Autowired
     RoomPkService roomPkService;
+
+    private static final String MIC_SEAT_INDEX_PREFIX = "RCSPlaceHolderKey_seat_";
 
     @Override
     public RestResult statusSync(ReqVideoRoomStatusSync statusSync) {
@@ -92,21 +96,31 @@ public class VideoRoomServiceImpl implements VideoRoomService{
             if(room==null){
                 return RestResult.success();
             }
-            ChrmEntrySetInfo newSetInfo =null;
-            if(RoomTypeEnum.CHAT_ROOM.getValue()==room.getRoomType().intValue() || RoomTypeEnum.GAME_ROOM.getValue()==room.getRoomType().intValue()){
-                for(ChrmEntrySetInfo setInfo:resultInfo.getKeys()){
-                    if(setInfo.getKey().startsWith("RCSeatInfoSeatPartPrefixKey")&&setInfo.getValue().contains(statusSync.getUserId())){
+            List<ChrmEntrySetInfo> infoList = new ArrayList<>();
+            if (RoomTypeEnum.CHAT_ROOM.getValue() == room.getRoomType().intValue()
+                || RoomTypeEnum.GAME_ROOM.getValue() == room.getRoomType().intValue()
+                || RoomTypeEnum.KTV_ROOM.getValue() == room.getRoomType().intValue()) {
+
+                for (ChrmEntrySetInfo setInfo : resultInfo.getKeys()) {
+                    if (setInfo.getKey().startsWith(MIC_SEAT_INDEX_PREFIX)
+                        && setInfo.getValue().contains(statusSync.getUserId())) {
+                        ChrmEntrySetInfo newInfo = new ChrmEntrySetInfo();
+                        BeanUtils.copyProperties(setInfo, newInfo);
+                        newInfo.setValue(StringUtils.EMPTY);
+                        infoList.add(newInfo);
+                    } else if (setInfo.getKey().startsWith("RCSeatInfoSeatPartPrefixKey")
+                        && setInfo.getValue().contains(statusSync.getUserId())) {
                         String value = setInfo.getValue();
-                        Map valueMap = (Map) GsonUtil.fromJson(value, Map.class);
-                        Double status = (Double) valueMap.get("status");
-                        if(status!=null&&status.intValue()==1){
-                            newSetInfo = new ChrmEntrySetInfo();
-                            BeanUtils.copyProperties(setInfo,newSetInfo);
-                            valueMap.put("status",0);
+                        Map valueMap = (Map)GsonUtil.fromJson(value, Map.class);
+                        Double status = (Double)valueMap.get("status");
+                        if (status != null && status.intValue() == 1) {
+                            ChrmEntrySetInfo newInfo = new ChrmEntrySetInfo();
+                            BeanUtils.copyProperties(setInfo, newInfo);
+                            valueMap.put("status", 0);
                             valueMap.remove("userId");
-                            newSetInfo.setValue(GsonUtil.toJson(valueMap));
-                            newSetInfo.setChrmId(statusSync.getRoomId());
-                            break;
+                            newInfo.setValue(GsonUtil.toJson(valueMap));
+                            newInfo.setChrmId(statusSync.getRoomId());
+                            infoList.add(newInfo);
                         }
                     }
                 }
@@ -120,13 +134,14 @@ public class VideoRoomServiceImpl implements VideoRoomService{
                         if (setInfo.getKey().startsWith("LIVE_VIDEO_SEAT_INFO_PRE_") && setInfo.getValue().contains(statusSync.getUserId())) {
                             String value = setInfo.getValue();
                             Map valueMap = (Map) GsonUtil.fromJson(value, Map.class);
-                            newSetInfo = new ChrmEntrySetInfo();
+                            ChrmEntrySetInfo newSetInfo = new ChrmEntrySetInfo();
                             BeanUtils.copyProperties(setInfo,newSetInfo);
                             valueMap.put("userEnableVideo",true);
                             valueMap.put("userEnableAudio",true);
                             valueMap.put("userId","");
                             newSetInfo.setValue(GsonUtil.toJson(valueMap));
                             newSetInfo.setChrmId(statusSync.getRoomId());
+                            infoList.add(newSetInfo);
                             break;
                         }
                     }
@@ -135,18 +150,18 @@ public class VideoRoomServiceImpl implements VideoRoomService{
             }else if(RoomTypeEnum.ELECT_ROOM.getValue()==room.getRoomType().intValue()){
                 for(ChrmEntrySetInfo setInfo:resultInfo.getKeys()) {
                     if (setInfo.getKey().startsWith("RCRadioRoomKVSeatingKey")){
-                        newSetInfo = new ChrmEntrySetInfo();
+                        ChrmEntrySetInfo newSetInfo = new ChrmEntrySetInfo();
                         BeanUtils.copyProperties(setInfo,newSetInfo);
                         newSetInfo.setValue("0");
                         newSetInfo.setChrmId(statusSync.getRoomId());
+                        infoList.add(newSetInfo);
                     }
                 }
             }
 
 
-            if(newSetInfo!=null){
-                IMApiResultInfo imApiResultInfo = imHelper.entrySet(newSetInfo, 3);
-                log.info("exception out entrySet result:{}",imApiResultInfo);
+            if (CollectionUtil.isNotEmpty(infoList)) {
+                this.entrySetBatch(infoList);
             }
             // 发送用户退出房间信息，不管在不在麦位上
             imHelper.publishSysMessage(uid,Lists.newArrayList(statusSync.getUserId()),message);
@@ -155,5 +170,15 @@ public class VideoRoomServiceImpl implements VideoRoomService{
             log.info("exception out message:{}",e.getMessage(),e);
         }
         return RestResult.success();
+    }
+
+    private void entrySetBatch(List<ChrmEntrySetInfo> infos) throws Exception {
+        if (CollectionUtil.isEmpty(infos)) {
+            return;
+        }
+        for (ChrmEntrySetInfo info : infos) {
+            IMApiResultInfo imApiResultInfo = this.imHelper.entrySet(info, 3);
+            log.info("exception out entrySet result:{}", imApiResultInfo);
+        }
     }
 }
