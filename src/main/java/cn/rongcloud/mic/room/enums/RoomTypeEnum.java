@@ -5,7 +5,8 @@ public enum RoomTypeEnum {
     CHAT_ROOM(1,"聊天室"),
     ELECT_ROOM(2, "电台"),
     VIDEO_ROOM(3,"直播"),
-    GAME_ROOM(4,"游戏房");
+    GAME_ROOM(4, "游戏房"),
+    KTV_ROOM(5, "ktv房");
 
     private int value;
 
