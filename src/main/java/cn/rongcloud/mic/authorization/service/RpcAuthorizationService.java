@@ -1,5 +1,6 @@
 package cn.rongcloud.mic.authorization.service;
 
+import cn.rongcloud.mic.authorization.pojos.AuthorizationResp;
 import cn.rongcloud.mic.common.rest.RestResult;
 
 public interface RpcAuthorizationService {
@@ -11,6 +12,6 @@ public interface RpcAuthorizationService {
 	 * @Author: gaoxin
 	 * @Date: 2021/9/3
 	 */
-	RestResult getWechatAppletAuthorization(String code) throws Exception;
+	RestResult<AuthorizationResp> getWechatAppletAuthorization(String code) throws Exception;
 
 }
