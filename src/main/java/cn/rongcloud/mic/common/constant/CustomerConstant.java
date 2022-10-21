@@ -15,4 +15,11 @@ public class CustomerConstant {
 
     //系统用户 用来发消息的
    public static final String SYSTEM_UID="_SYSTEM_";
+
+    /**
+     * 微信session_key缓存
+     */
+    public static final String WX_SESSION_KEY_CACHE_PREFIX = "wx_session_key:";
+
+    public static final int WX_REQUEST_SUCCESS = 0;
 }

@@ -71,6 +71,12 @@ public enum RestResultCode {
     ERR_GROUP_DEFAULT_JOIN(90009,"不能删除默认进入频道所在的分组"),
     ERR_CHANNEL_NAME(90010,"频道名称在该社区下已经存在"),
     ERR_GROUP_NAME(90010,"分组名称在该社区下已经存在"),
+
+    ERR_WX_SESSION_AUTH_ERROR(100003, "微信鉴权失败"),
+
+    ERR_WX_SESSION_KEY_INVALID(100003, "session_key无效或已过期"),
+
+    ERR_ENCRYPTED_DATA_DECODE_FAILED(100003, "EncryptedData解析失败")
     ;
 
     private int code;

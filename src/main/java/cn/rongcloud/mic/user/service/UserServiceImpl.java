@@ -11,9 +11,13 @@ import cn.rongcloud.common.utils.DateTimeUtils;
 import cn.rongcloud.common.utils.GsonUtil;
 import cn.rongcloud.common.utils.HttpHelper;
 import cn.rongcloud.common.utils.IdentifierUtils;
+import cn.rongcloud.common.utils.WXUtils;
+import cn.rongcloud.mic.authorization.pojos.ResLoginWX;
+import cn.rongcloud.mic.authorization.pojos.WXDecodeInfo;
 import cn.rongcloud.mic.common.constant.CustomerConstant;
 import cn.rongcloud.mic.common.jwt.JwtTokenHelper;
 import cn.rongcloud.mic.common.jwt.JwtUser;
+import cn.rongcloud.mic.common.redis.RedisUtils;
 import cn.rongcloud.mic.common.utils.JwtUtils;
 import cn.rongcloud.mic.common.rest.RestException;
 import cn.rongcloud.mic.common.rest.RestResult;
@@ -32,6 +36,7 @@ import cn.rongcloud.mic.user.model.TUser;
 import cn.rongcloud.mic.user.model.TUserFollow;
 import cn.rongcloud.mic.user.pojos.*;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -111,6 +116,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TCommunityUserService tCommunityUserService;
 
+    private RedisUtils redisUtils;
+
+    @Autowired
+    public void setRedisUtils(RedisUtils redisUtils) {
+        this.redisUtils = redisUtils;
+    }
+
     @Override
     public RestResult login(ReqLogin data, HttpServletRequest httpReq) {
         return this.login(data, true, httpReq);
@@ -127,6 +139,29 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public RestResult<ResLoginWX> loginWXV2(ReqLoginWX data, HttpServletRequest httpReq) {
+
+        String sessionKey = (String) redisUtils.get(CustomerConstant.WX_SESSION_KEY_CACHE_PREFIX + data.getOpenId());
+        if (StringUtils.isEmpty(sessionKey)) {
+            return RestResult.generic(RestResultCode.ERR_WX_SESSION_KEY_INVALID);
+        }
+
+        JSONObject decodeInfo = WXUtils.getDecodeInfo(data.getEncryptedData(), sessionKey,
+            data.getIv());
+        if (Objects.isNull(decodeInfo)) {
+            return RestResult.generic(RestResultCode.ERR_ENCRYPTED_DATA_DECODE_FAILED);
+        }
+        WXDecodeInfo wxDecodeInfo = decodeInfo.toJavaObject(WXDecodeInfo.class);
+        RestResult<ResLogin> login = login(ReqLogin.builder()
+            .mobile(wxDecodeInfo.getPurePhoneNumber())
+            // 小程序好像获取不到设备id
+            .deviceId(data.getOpenId())
+            .build(), false, httpReq);
+        ResLogin resLogin = login.getResult();
+        return RestResult.success(ResLoginWX.buildResLoginWX(resLogin, wxDecodeInfo));
     }
 
     @Override

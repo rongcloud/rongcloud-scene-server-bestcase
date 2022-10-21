@@ -1,10 +1,12 @@
 package cn.rongcloud.mic.user.service;
 
 
+import cn.rongcloud.mic.authorization.pojos.ResLoginWX;
 import cn.rongcloud.mic.common.rest.RestResult;
 import cn.rongcloud.mic.common.jwt.JwtUser;
 import cn.rongcloud.mic.user.model.TUser;
 import cn.rongcloud.mic.user.pojos.ReqLogin;
+import cn.rongcloud.mic.user.pojos.ReqLoginWX;
 import cn.rongcloud.mic.user.pojos.ReqSendCode;
 import cn.rongcloud.mic.user.pojos.ReqUpdate;
 import cn.rongcloud.mic.user.pojos.ReqUserIds;
@@ -27,6 +29,8 @@ public interface UserService {
 
     //微信登录
     RestResult<ResLogin> loginWX(ReqLogin data, HttpServletRequest httpReq);
+
+    RestResult<ResLoginWX> loginWXV2(ReqLoginWX data,HttpServletRequest httpReq);
 
     RestResult<ResLogin> visitorLogin(ReqVisitorLogin loginData);
 

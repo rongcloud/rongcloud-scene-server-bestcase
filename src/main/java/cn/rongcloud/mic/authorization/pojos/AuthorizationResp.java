@@ -1,0 +1,22 @@
+package cn.rongcloud.mic.authorization.pojos;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author qzyu
+ * @date 2022/10/17
+ */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthorizationResp {
+
+    @JsonProperty("openid")
+    private String openId;
+}

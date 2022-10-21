@@ -1,5 +1,6 @@
 package cn.rongcloud.mic.authorization.controller;
 
+import cn.rongcloud.mic.authorization.pojos.AuthorizationResp;
 import cn.rongcloud.mic.authorization.service.RpcAuthorizationService;
 import cn.rongcloud.common.utils.WXUtils;
 import cn.rongcloud.mic.common.rest.RestResult;
@@ -40,12 +41,16 @@ public class RpcAuthorizationController {
 	@ApiOperation(value = "微信小程序获取权限")
 	@GetMapping(value = "/getWechatAppletAuthorization")
 	@ApiImplicitParam(name = "code", value = "code",required = true)
-	public RestResult getWechatAppletAuthorization(@RequestParam String code)
+	public RestResult<AuthorizationResp> getWechatAppletAuthorization(@RequestParam String code)
 			throws Exception {
-		log.info("RpcAuthorizationController wechatAppletAuthorization, operator:{}, data:{}", code);
+		log.info("RpcAuthorizationController wechatAppletAuthorization, data:{}", code);
 		return rpcAuthorizationService.getWechatAppletAuthorization(code);
 	}
 
+	/**
+	 * 已弃用
+	 */
+	@Deprecated
 	@ApiOperation(value = "解密用户微信小程序信息")
 	@GetMapping(value = "/getUserDecodeInfo")
 	@ApiImplicitParams({

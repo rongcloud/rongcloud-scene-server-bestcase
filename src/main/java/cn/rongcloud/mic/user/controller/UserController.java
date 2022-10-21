@@ -1,6 +1,7 @@
 package cn.rongcloud.mic.user.controller;
 
 import cn.rongcloud.common.utils.GsonUtil;
+import cn.rongcloud.mic.authorization.pojos.ResLoginWX;
 import cn.rongcloud.mic.common.annotation.RedisKeyRepeatSubmit;
 import cn.rongcloud.mic.common.rest.RestResult;
 import cn.rongcloud.mic.common.jwt.JwtUser;
@@ -111,6 +112,12 @@ public class UserController {
     public RestResult<ResLogin> loginWX(@RequestBody ReqLogin data,HttpServletRequest httpReq) {
         log.info("user wechat login: {}", GsonUtil.toJson(data));
         return userService.loginWX(data,httpReq);
+    }
+
+    @ApiOperation("微信用户登录V2")
+    @PostMapping(value = "/wx/loginV2")
+    public RestResult<ResLoginWX> loginWXV2(@RequestBody ReqLoginWX data,HttpServletRequest httpReq) {
+        return userService.loginWXV2(data, httpReq);
     }
 
     @ApiOperation("批量获取用户信息")

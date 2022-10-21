@@ -3,12 +3,18 @@ package cn.rongcloud.mic.user.pojos;
 import javax.validation.constraints.NotBlank;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by sunyinglong on 2020/5/25.
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReqLogin {
     @NotBlank(message = "deviceId should not be blank")
     @ApiModelProperty("设备id")
