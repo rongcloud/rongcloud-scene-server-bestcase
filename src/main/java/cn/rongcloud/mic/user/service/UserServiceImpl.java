@@ -159,7 +159,8 @@ public class UserServiceImpl implements UserService {
             .mobile(wxDecodeInfo.getPurePhoneNumber())
             // 小程序好像获取不到设备id
             .deviceId(data.getOpenId())
-            .build(), false, httpReq);        ResLogin resLogin = login.getResult();
+            .build(), false, httpReq);
+        ResLogin resLogin = login.getResult();
         return RestResult.success(ResLoginWX.buildResLoginWX(resLogin, wxDecodeInfo));
     }
 
