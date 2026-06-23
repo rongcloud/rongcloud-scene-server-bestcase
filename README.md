@@ -1,3 +1,8 @@
+> [!WARNING]
+> ⚠️ **暂停维护说明**
+>
+> 该工程已不再维护，代码仅供学习参考。
+
 ## cn.rongcloud-scene-server-bestcase
 
 本项目为 cn.rongcloud-scene-server-bestcase  应用程序的后端服务，提供了 用户登陆、创建房间、房间音乐、房间pk、实时社区等相关接口。cn.rongcloud-scene-server-bestcase 是以 IMSDK 和 RTCSDK 为基础开发的开源语音聊天应用程序，充分展示了融云音视频和 IM 在语聊房的等相关场景上的能力使用，您可以拿来参考或修改使用。
